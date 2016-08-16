@@ -1,0 +1,111 @@
+Tom Straight tstra2
+CSC385
+Final Project Analysis
+
+
+a. data structures that you used to store movie information and ratings and the algorithm that you used to compute the top 5 recommendation.
+
+Data Structures
+--------------------------------------------------------
+
+HashMap movieDict (key: movieId, value: Movie object)
+	-used as index of all movies, each has unique object
+
+	within Movie class:
+
+	HashMap reviews (key: userId, value: rating) 
+		-keeps track of the user and rating for every rating given to a movie
+		-allows movies to compare what the same user rated each
+	HashMap comparisons ((key: movieId, value: similarity score) 
+		-allows user's topFive method to grab movie similarities to calculate recomendations
+
+	
+HashMap userDict (key: userId, value: User object)
+	-used as index of all users, each has unique object
+
+	within User class:
+	
+	ArrayList moviesSeen- movieIds
+		-contains movies the user has seen to calculate recomendations
+
+
+Algorithms
+-------------------------------------------------------	
+The algorithms used for movie similarity and predicted score were the same provided in the project details:
+
+Comparing 2 movies:
+	for every user that has reviewed either of the 2 movies
+		get user Reviews for both (filling in as zero when one is missing)
+		multiply scores together and add to numerator
+		square each score and add to respective side of denominator
+	once all scores given to either movie are collected
+		numerator = total of (the two reviews multiplied)
+		left side of denominator = total of (review 1 squared)
+		right side of denominator = total of (review 2 squared)
+	multiply the square roots of left side and right side of denominator
+	divide numerator by denominator for similarity score
+
+Predicting user's rating for a movie they haven't seen:
+		for every movie they have seen
+			get the similarity score between the 2 movies (seen, unseen)
+			multiply the rating the user gave by that similarity, add this to numerator
+			add the similarity to denominator
+		predicted rating = total numerator / total denominator
+	
+			
+Getting User's top 5:
+	create a 2d array with 5 rows with {movieId, predictedRating} (all initially set to {0, 0}
+	for every movie that the user has not seen
+		calculate the predicted user rating
+		check against existing 2d array elements, if higher bump them down/off the list
+		
+		
+
+
+
+b. Analysis of the order of magnitude efficiency (big –Oh) of your algorithm in terms of the number of users, and movies. Briefly explain how you derived the big-Oh.
+
+hashmap 
+	add O(1) - no rehashing
+	get/contains O(N) - possible whole list
+
+array list 
+	add O(1)- just adding to end of list
+	contains/get- O(N) possible whole list
+
+----------------------------------------------------
+
+
+A) Scanning first document
+	checking to see if movie already exists- O(Movies)
+		adding if new- O(1)
+		adding review to reviews- O(1)
+	checking to see if user already exists - O(Users)
+		adding if new- O(1)
+		adding movie to movie seen array list - O(1)
+B) Scanning second document
+	find movie and add title - O(Movies)
+		get every other movie below it to compare- O(Movies)
+			get every user in movieA reviews O(Users) - worst case all users have reviewed movie
+			get every user in movieB reviews O(Users) - worst case all users have reviewed movie
+			add similarity score to both movies O(1)
+C) Calculating user top 5
+	for every user - O(Users)
+		get user -  O(Users)
+		if !user movieSeen.contains - O(Movies)- worst case user has seen all movies
+			for every movie they've seen O(Movies)- worst case user has seen all movies
+				movieDict.getMovie(moviesSeen.get)- O(Movies + Movies) - worst case user has seen all movies
+				comparison.get - O(Movies)
+				getMovie's Reviews - O(Users) - worst case all users have reviewed movie
+		get Movie title - O(Movies)
+
+
+Total A: O(Movies + Users)
+Total B: O(Movies * Movies * (2 * Users)) = O(2(Movies^2)(Users))
+Total C: O(Users * (Users + (Movies * Movies * ((2 * Movies) + Movies + Users)) + Movies) 
+	= O(Users(Users + (Movies^2)((4*Movies) + Users)))
+	
+	
+Grand Total = O(4(M^3)U + 2(M^2)U + M + 2(U^2) + U)
+
+
